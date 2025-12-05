@@ -33,15 +33,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y wget jq tar
+
       - name: Install kubeval
         run: |
-          curl -s https://api.github.com/repos/instrumenta/kubeval/releases/latest \
-          | grep browser_download_url \
-          | grep linux-amd64 \
-          | cut -d '"' -f 4 \
-          | wget -qi -
-          chmod +x kubeval-*-linux-amd64
-          sudo mv kubeval-*-linux-amd64 /usr/local/bin/kubeval
+          set -euo pipefail
+          KVER=$(curl -s https://api.github.com/repos/instrumenta/kubeval/releases/latest | jq -r .tag_name)
+          curl -Lo kubeval.tar.gz https://github.com/instrumenta/kubeval/releases/download/${KVER}/kubeval-linux-amd64.tar.gz
+          tar -xzf kubeval.tar.gz
+          chmod +x kubeval
+          sudo mv kubeval /usr/local/bin/
 
       - name: Validate K8s Manifests
         run: kubeval k8s/*.yaml
@@ -77,8 +79,8 @@ jobs:
 
       - name: Install kubeconform
         run: |
-          wget https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
-          tar -xzf kubeconform-linux-amd64.tar.gz
+          wget https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64 -O kubeconform
+          chmod +x kubeconform
           sudo mv kubeconform /usr/local/bin
 
       - name: Validate ArgoCD Manifests
