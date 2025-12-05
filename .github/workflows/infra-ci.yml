@@ -72,16 +72,18 @@ jobs:
         run: ansible-playbook playbook.yml --syntax-check
 
   argocd_validate:
-    name: ArgoCD Manifest Validation
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+    argocd_validate:
+  name: ArgoCD Manifest Validation
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v3
 
-      - name: Install kubeconform
-        run: |
-          wget https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64 -O kubeconform
-          chmod +x kubeconform
-          sudo mv kubeconform /usr/local/bin
+    - name: Install kubeconform
+      run: |
+        wget https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz -O kubeconform.tar.gz
+        tar -xzf kubeconform.tar.gz
+        chmod +x kubeconform
+        sudo mv kubeconform /usr/local/bin/
 
-      - name: Validate ArgoCD Manifests
-        run: kubeconform -strict -summary argocd/*.yaml
+    - name: Validate ArgoCD Manifests
+      run: kubeconform -strict -summary argocd/*.yaml
